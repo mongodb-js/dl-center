@@ -10,7 +10,7 @@
     "test": "mocha --timeout 60000 --colors -r ts-node/register \"./src/*.spec.ts\"",
     "lint": "eslint .",
     "prebuild": "npm run generate-config-from-schema",
-    "build": "tsc -p tsconfig.json",
+    "build": "rm -Rf dist && tsc -p tsconfig.json",
     "prepublishOnly": "npm run lint && npm run build && npm run test"
   },
   "keywords": [],
