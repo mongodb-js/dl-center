@@ -1,5 +1,5 @@
 {
-  "name": "@mongodb-js/download-center",
+  "name": "@mongodb-js/dl-center",
   "version": "1.0.0",
   "description": "mongodb download center internal tools",
   "main": "dist/index.js",
