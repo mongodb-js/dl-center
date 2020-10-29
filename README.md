@@ -14,7 +14,7 @@ Provides a set of functions to aid releases to the download center.
 #### Create a new DownloadCenter instance
 
 ``` js
-import { DownloadCenter } from '@mongodb-js/download-center';
+import { DownloadCenter } from '@mongodb-js/dl-center';
 
 const bucketConfig = {
   bucket: `${process.env.MONGODB_DOWNLOADS_BUCKET_NAME}`,
@@ -68,7 +68,7 @@ fs.writeFileSync('./compass.tgz', buffer);
 #### Validates a configuration without uploading it
 
 ``` js
-import { validateConfig } from '@mongodb-js/download-center';
+import { validateConfig } from '@mongodb-js/dl-center';
 
 await validateConfig({ /* ... */ });
 ```
