@@ -11,7 +11,7 @@
     "lint": "eslint .",
     "prebuild": "npm run generate-config-from-schema",
     "build": "tsc -p tsconfig.json",
-    "prepublishOnly": "run-s lint build test"
+    "prepublishOnly": "npm run lint && npm run build && npm run test"
   },
   "keywords": [],
   "author": "",
