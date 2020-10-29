@@ -25,7 +25,9 @@ const bucketConfig = {
 const downloadCenter = new DownloadCenter(bucketConfig);
 ```
 
-#### Validate and upload configuration
+#### Validate and upload a configuration
+
+`downloadCenter.uploadConfig` validates a configuration against a [json schema](https://github.com/mongodb-js/download-center/blob/main/src/download-center-config.schema.json), checks that all the download links are reacheable and uploads the configuration to the download center.
 
 ``` js
 const compassConfig = {
