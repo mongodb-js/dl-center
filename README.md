@@ -36,14 +36,14 @@ const compassConfig = {
 await downloadCenter.uploadConfig('compass/compass.json', compassConfig);
 ```
 
-#### download a configuration
+#### Download a configuration
 
 ``` js
 const config = await downloadCenter.downloadConfig('compass/compass.json');
 assert(config.versions.length > 1);
 ```
 
-#### upload an asset
+#### Upload an asset
 
 ``` js
 const config = await downloadCenter.uploadAsset(
@@ -53,7 +53,7 @@ const config = await downloadCenter.uploadAsset(
 );
 ```
 
-#### download an asset
+#### Download an asset
 
 ``` js
 const buffer = await downloadCenter.downloadAsset(
