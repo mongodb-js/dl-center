@@ -1,6 +1,6 @@
 {
   "name": "@mongodb-js/dl-center",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "mongodb download center internal tools",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
