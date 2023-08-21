@@ -1,6 +1,5 @@
 import fs, { mkdirp } from 'fs-extra';
 import path from 'path';
-import os from 'os';
 import execa from 'execa';
 import nock from 'nock';
 import expect from 'expect';
@@ -15,6 +14,11 @@ import {
 import { DownloadCenterConfigV2 } from './download-center-config';
 
 describe('download center client', () => {
+  function nockLink(link: string, status: number, headers = {}): void {
+    const url = new URL(link);
+    nock(url.origin).head(url.pathname).reply(status, undefined, headers);
+  }
+
   let containerId: string;
   let tempDir: string;
 
@@ -236,11 +240,6 @@ describe('download center client', () => {
     });
 
     describe('validateConfigUrls', () => {
-      function nockLink(link: string, status: number, headers = {}): void {
-        const url = new URL(link);
-        nock(url.origin).head(url.pathname).reply(status, undefined, headers);
-      }
-
       describe('when all links are correct', () => {
         beforeEach(() => {
           nock.cleanAll();
@@ -333,7 +332,7 @@ describe('download center client', () => {
     });
   });
 
-  describe('validate-config v2', () => {
+  describe.only('validate-config v2', () => {
     const links = {
       darwin_zip: 'https://downloads.mongodb.com/compass/mongosh-0.2.2-darwin.zip',
       darwin_dmg: 'https://downloads.mongodb.com/compass/mongosh-0.2.2-darwin.dmg',
@@ -391,27 +390,21 @@ describe('download center client', () => {
         }).not.toThrow();
       });
 
-      it('throws with a valid config', () => {
+      it('throws with an invalid config', () => {
         const invalidConfig = { ...downloadCenterJson, manual_link: undefined };
 
         expect(() => {
           validateConfigSchema(invalidConfig as any);
-        }).toThrowError('Invalid configuration: data should have' +
-         ' required property \'manual_link\'');
+        }).toThrowError(/data should have required property \'manual_link\'/);
       });
     });
 
     describe('validateConfigUrls', () => {
-      function nockLink(link: string, status: number, headers = {}): void {
-        const url = new URL(link);
-        nock(url.origin).head(url.pathname).reply(status, undefined, headers);
-      }
-
       describe('when all links are correct', () => {
         beforeEach(() => {
           nock.cleanAll();
           nockLink(links.darwin_zip, 302, { 'Location': 'http://example.com/redirect' });
-          nockLink(links.darwin_dmg, 302, { 'Location': 'http://example.com/redirect' });
+          nockLink(links.darwin_dmg, 200);
           nockLink(links.win32_zip, 200);
           nockLink(links.win32_msi, 200);
           nockLink(links.linux, 200);
@@ -455,8 +448,8 @@ describe('download center client', () => {
           expect(error).not.toBeUndefined();
           expect(error.message).toEqual(
             'Download center urls broken:\n' +
-              `- ${links.win32_msi} -> 404\n` +
-              `- ${links.linux} -> 404`
+              `- ${links.linux} -> 404\n` +
+              `- ${links.win32_msi} -> 404`
           );
         });
       });

@@ -152,7 +152,6 @@ async function validateDownloadLinksV2(
   }
 }
 
-
 /**
  * Validates all the asset links referenced in a configuration object.
  * Makes an HEAD http call for each asset link and throws an error in case
@@ -167,7 +166,7 @@ async function validateDownloadLinksV2(
 export async function validateDownloadLinks(
   config: DownloadCenterConfig
 ): Promise<void> {
-  if ('version' in config) {
+  if ('versions' in config) {
     return await validateDownloadLinksV1(config as unknown as DownloadCenterConfigV1);
   }
 
