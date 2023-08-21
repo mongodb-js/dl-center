@@ -437,7 +437,7 @@ describe('download center client', () => {
           nockLink(links.darwin_zip, 200);
           nockLink(links.win32_msi, 302, { 'Location': 'http://example.com/redirect' });
           nockLink(links.win32_zip, 200);
-          nockLink(links.linux, 200);
+          nockLink(links.linux, 404);
           nockLink('http://example.com/redirect', 404);
         });
 
@@ -455,8 +455,8 @@ describe('download center client', () => {
           expect(error).not.toBeUndefined();
           expect(error.message).toEqual(
             'Download center urls broken:\n' +
-              '- https://downloads.mongodb.com/compass/mongosh-0.2.2-win32.zip -> 404\n' +
-              '- https://downloads.mongodb.com/compass/mongosh_0.2.2_amd64.deb -> 404'
+              `- ${links.win32_msi} -> 404\n` +
+              `- ${links.linux} -> 404`
           );
         });
       });
