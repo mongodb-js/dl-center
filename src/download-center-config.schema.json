@@ -1,89 +1,145 @@
 {
   "title": "DownloadCenterConfig",
   "type": "object",
-  "required": [
-    "versions",
-    "manual_link",
-    "release_notes_link",
-    "previous_releases_link",
-    "development_releases_link",
-    "supported_browsers_link",
-    "tutorial_link"
+  "oneOf": [
+    { "$ref": "#/definitions/DownloadCenterConfigV1" },
+    { "$ref": "#/definitions/DownloadCenterConfigV2" }
   ],
-  "properties": {
-    "versions": {
-      "type": "array",
-      "additionalItems": false,
-      "items": {
-        "type": "object",
-        "required": [
-          "_id",
-          "version",
-          "platform"
-        ],
-        "properties": {
-          "_id": {
-            "type": "string",
-            "pattern": ".+"
-          },
-          "version": {
-            "type": "string",
-            "pattern": ".+"
-          },
-          "platform": {
-            "type": "array",
-            "additionalItems": false,
-            "items": {
-              "type": "object",
-              "required": [
-                "arch",
-                "os",
-                "name",
-                "download_link"
-              ],
-              "properties": {
-                "arch": {
-                  "type": "string",
-                  "pattern": ".+"
-                },
-                "os": {
-                  "type": "string",
-                  "pattern": ".+"
-                },
-                "name": {
-                  "type": "string",
-                  "pattern": ".+"
-                },
-                "download_link": {
-                  "type": "string",
-                  "pattern": ".+"
-                }
+  "definitions": {
+    "DownloadCenterConfigV1": {
+      "type": "object",
+      "required": [
+        "versions",
+        "manual_link",
+        "release_notes_link",
+        "previous_releases_link",
+        "development_releases_link",
+        "supported_browsers_link",
+        "tutorial_link"
+      ],
+      "properties": {
+        "versions": {
+          "type": "array",
+          "additionalItems": false,
+          "items": {
+            "type": "object",
+            "required": ["_id", "version", "platform"],
+            "properties": {
+              "_id": {
+                "type": "string",
+                "pattern": ".+"
               },
-              "additionalProperties": false
-            }
+              "version": {
+                "type": "string",
+                "pattern": ".+"
+              },
+              "platform": {
+                "type": "array",
+                "additionalItems": false,
+                "items": {
+                  "type": "object",
+                  "required": ["arch", "os", "name", "download_link"],
+                  "properties": {
+                    "arch": {
+                      "type": "string",
+                      "pattern": ".+"
+                    },
+                    "os": {
+                      "type": "string",
+                      "pattern": ".+"
+                    },
+                    "name": {
+                      "type": "string",
+                      "pattern": ".+"
+                    },
+                    "download_link": {
+                      "type": "string",
+                      "pattern": ".+"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false
           }
         },
-        "additionalProperties": false
-      }
+        "manual_link": {
+          "type": "string"
+        },
+        "release_notes_link": {
+          "type": "string"
+        },
+        "previous_releases_link": {
+          "type": "string"
+        },
+        "development_releases_link": {
+          "type": "string"
+        },
+        "supported_browsers_link": {
+          "type": "string"
+        },
+        "tutorial_link": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
     },
-    "manual_link": {
-      "type": "string"
+    "DownloadCenterConfigV2": {
+      "type": "object",
+      "properties": {
+        "previous_releases_link": { "type": "string" },
+        "release_notes_link": { "type": "string" },
+        "tutorial_link": { "type": "string" },
+        "version": { "type": "string" },
+        "manual_link": { "type": "string" },
+        "platform": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Platform"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "previous_releases_link",
+        "release_notes_link",
+        "tutorial_link",
+        "version",
+        "manual_link",
+        "platform"
+      ]
     },
-    "release_notes_link": {
-      "type": "string"
+    "Platform": {
+      "type": "object",
+      "properties": {
+        "arch": { "type": "string" },
+        "os": { "type": "string" },
+        "packages": { "$ref": "#/definitions/Package" }
+      },
+      "additionalProperties": false,
+      "required": ["arch", "os", "packages"]
     },
-    "previous_releases_link": {
-      "type": "string"
+    "Package": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "links": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Link" }
+        }
+      },
+      "additionalProperties": false,
+      "required": ["title", "links"]
     },
-    "development_releases_link": {
-      "type": "string"
-    },
-    "supported_browsers_link": {
-      "type": "string"
-    },
-    "tutorial_link": {
-      "type": "string"
+    "Link": {
+      "type": "object",
+      "properties": {
+        "download_link": { "type": "string" },
+        "name": { "type": "string" }
+      },
+      "required": ["download_link", "name"],
+      "additionalProperties": false
     }
-  },
-  "additionalProperties": false
+  }
 }

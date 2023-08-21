@@ -4,7 +4,7 @@ import Ajv from 'ajv';
 import S3, { Body as Content } from 'aws-sdk/clients/s3';
 
 import downloadCenterSchema from './download-center-config.schema.json';
-import { DownloadCenterConfig } from './download-center-config';
+import type { DownloadCenterConfig, DownloadCenterConfigV1, DownloadCenterConfigV2, Link } from './download-center-config';
 
 export type S3BucketConfig = {
   /**
@@ -87,19 +87,8 @@ export function validateConfigSchema(
   }
 }
 
-/**
- * Validates all the asset links referenced in a configuration object.
- * Makes an HEAD http call for each asset link and throws an error in case
- * an asset is not reacheable.
- *
- * @static
- * @param {DownloadCenterConfig} config -
- *  the download center product configuration document.
- * @return {Promise<void>}
- * @memberof DownloadCenter
- */
-export async function validateDownloadLinks(
-  config: DownloadCenterConfig
+async function validateDownloadLinksV1(
+  config: DownloadCenterConfigV1
 ): Promise<void> {
   const errors: Record<string, number> = {};
 
@@ -129,6 +118,60 @@ export async function validateDownloadLinks(
 
     throw new Error(`Download center urls broken:\n${errorMsg}`);
   }
+}
+
+async function validateDownloadLinksV2(
+  config: DownloadCenterConfigV2
+): Promise<void> {
+  const errors: Record<string, number> = {};
+  const links: Link[] = [];
+
+  for (const platform of config.platform) {
+    for (const link of platform.packages.links) {
+      links.push(link);
+    }
+  }
+
+  const probes = links.map((link) => {
+    return probePlatformDownloadLink(link)
+      .then((probe) => {
+        if (!probe.ok) {
+          errors[link.download_link] = probe.status;
+        }
+      });
+  });
+
+  await Promise.all(probes);
+
+  if (Object.keys(errors).length) {
+    const errorMsg = Object.entries(errors).map(
+      ([url, status]) => `- ${url} -> ${status}`
+    ).sort().join('\n');
+
+    throw new Error(`Download center urls broken:\n${errorMsg}`);
+  }
+}
+
+
+/**
+ * Validates all the asset links referenced in a configuration object.
+ * Makes an HEAD http call for each asset link and throws an error in case
+ * an asset is not reacheable.
+ *
+ * @static
+ * @param {DownloadCenterConfig} config -
+ *  the download center product configuration document.
+ * @return {Promise<void>}
+ * @memberof DownloadCenter
+ */
+export async function validateDownloadLinks(
+  config: DownloadCenterConfig
+): Promise<void> {
+  if ('version' in config) {
+    return await validateDownloadLinksV1(config as unknown as DownloadCenterConfigV1);
+  }
+
+  return await validateDownloadLinksV2(config as unknown as DownloadCenterConfigV2);
 }
 
 /**
