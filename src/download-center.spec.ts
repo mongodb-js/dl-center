@@ -332,7 +332,7 @@ describe('download center client', () => {
     });
   });
 
-  describe.only('validate-config v2', () => {
+  describe('validate-config v2', () => {
     const links = {
       darwin_zip: 'https://downloads.mongodb.com/compass/mongosh-0.2.2-darwin.zip',
       darwin_dmg: 'https://downloads.mongodb.com/compass/mongosh-0.2.2-darwin.dmg',
