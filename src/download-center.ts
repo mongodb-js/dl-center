@@ -65,6 +65,21 @@ type ProbeResponse = {
 const CONFIG_JSON_SCHEMA = Object.freeze(downloadCenterSchema);
 const ACL_PUBLIC_READ = 'public-read';
 
+
+/**
+ * Probes the download_link for a configuration platform.
+ * Returns the response of the probe.
+ *
+ * @static
+ * @param {DownloadCenterConfigPlatform} platform
+ * @return {Promise<ProbeResponse>}
+ * @memberof DownloadCenter
+ */
+export async function probePlatformDownloadLink(
+  platform: DownloadCenterConfigPlatform): Promise<ProbeResponse> {
+  return await fetch(platform.download_link, { method: 'HEAD' });
+}
+
 /**
  * Vaidates a download center configuration object against a json schema.
  * Throws an error if the configuration is invalid.
@@ -171,20 +186,6 @@ export async function validateDownloadLinks(
   }
 
   return await validateDownloadLinksV2(config as unknown as DownloadCenterConfigV2);
-}
-
-/**
- * Probes the download_link for a configuration platform.
- * Returns the response of the probe.
- *
- * @static
- * @param {DownloadCenterConfigPlatform} platform
- * @return {Promise<ProbeResponse>}
- * @memberof DownloadCenter
- */
-export async function probePlatformDownloadLink(
-  platform: DownloadCenterConfigPlatform): Promise<ProbeResponse> {
-  return await fetch(platform.download_link, { method: 'HEAD' });
 }
 
 /**
