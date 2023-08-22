@@ -1,4 +1,3 @@
-/* eslint-disable */
 /* AUTO-GENERATED DO NOT EDIT. */
 
 export interface DownloadCenterConfig {
