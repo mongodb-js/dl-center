@@ -123,7 +123,7 @@ export async function validateDownloadLinks(
     for (const platform of version.platform) {
       if ('download_link' in platform) {
         const singlePlatform = platform as PlatformWithDownloadLink;
-        links.push({ download_link: singlePlatform.download_link, name: '' });
+        links.push(singlePlatform);
       } else {
         const platformWithPackages = platform as PlatformWithPackages;
         links.push(...platformWithPackages.packages.links);
