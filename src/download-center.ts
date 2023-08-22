@@ -4,7 +4,7 @@ import Ajv from 'ajv';
 import S3, { Body as Content } from 'aws-sdk/clients/s3';
 
 import downloadCenterSchema from './download-center-config.schema.json';
-import { DownloadCenterConfig } from './download-center-config';
+import type { DownloadCenterConfig, Link, PlatformWithDownloadLink, PlatformWithPackages } from './download-center-config';
 
 export type S3BucketConfig = {
   /**
@@ -66,6 +66,20 @@ const CONFIG_JSON_SCHEMA = Object.freeze(downloadCenterSchema);
 const ACL_PUBLIC_READ = 'public-read';
 
 /**
+ * Probes the download_link for a configuration platform.
+ * Returns the response of the probe.
+ *
+ * @static
+ * @param {DownloadCenterConfigPlatform} platform
+ * @return {Promise<ProbeResponse>}
+ * @memberof DownloadCenter
+ */
+export async function probePlatformDownloadLink(
+  platform: DownloadCenterConfigPlatform): Promise<ProbeResponse> {
+  return await fetch(platform.download_link, { method: 'HEAD' });
+}
+
+/**
  * Vaidates a download center configuration object against a json schema.
  * Throws an error if the configuration is invalid.
  *
@@ -87,6 +101,7 @@ export function validateConfigSchema(
   }
 }
 
+
 /**
  * Validates all the asset links referenced in a configuration object.
  * Makes an HEAD http call for each asset link and throws an error in case
@@ -102,20 +117,25 @@ export async function validateDownloadLinks(
   config: DownloadCenterConfig
 ): Promise<void> {
   const errors: Record<string, number> = {};
-
-  const platforms: DownloadCenterConfigPlatform[] = [];
+  const links: Link[] = [];
 
   for (const version of config.versions) {
     for (const platform of version.platform) {
-      platforms.push(platform);
+      if ('download_link' in platform) {
+        const singlePlatform = platform as PlatformWithDownloadLink;
+        links.push(singlePlatform);
+      } else {
+        const platformWithPackages = platform as PlatformWithPackages;
+        links.push(...platformWithPackages.packages.links);
+      }
     }
   }
 
-  const probes = platforms.map((platform) => {
-    return probePlatformDownloadLink(platform)
+  const probes = links.map((link) => {
+    return probePlatformDownloadLink(link)
       .then((probe) => {
         if (!probe.ok) {
-          errors[platform.download_link] = probe.status;
+          errors[link.download_link] = probe.status;
         }
       });
   });
@@ -129,20 +149,6 @@ export async function validateDownloadLinks(
 
     throw new Error(`Download center urls broken:\n${errorMsg}`);
   }
-}
-
-/**
- * Probes the download_link for a configuration platform.
- * Returns the response of the probe.
- *
- * @static
- * @param {DownloadCenterConfigPlatform} platform
- * @return {Promise<ProbeResponse>}
- * @memberof DownloadCenter
- */
-export async function probePlatformDownloadLink(
-  platform: DownloadCenterConfigPlatform): Promise<ProbeResponse> {
-  return await fetch(platform.download_link, { method: 'HEAD' });
 }
 
 /**

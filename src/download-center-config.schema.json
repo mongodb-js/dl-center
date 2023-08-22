@@ -32,38 +32,14 @@
           },
           "platform": {
             "type": "array",
-            "additionalItems": false,
-            "items": {
-              "type": "object",
-              "required": [
-                "arch",
-                "os",
-                "name",
-                "download_link"
-              ],
-              "properties": {
-                "arch": {
-                  "type": "string",
-                  "pattern": ".+"
-                },
-                "os": {
-                  "type": "string",
-                  "pattern": ".+"
-                },
-                "name": {
-                  "type": "string",
-                  "pattern": ".+"
-                },
-                "download_link": {
-                  "type": "string",
-                  "pattern": ".+"
-                }
-              },
-              "additionalProperties": false
+            "items": { "oneOf": [
+                { "$ref": "#/definitions/PlatformWithDownloadLink" },
+                { "$ref": "#/definitions/PlatformWithPackages" }
+              ]
             }
-          }
-        },
-        "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
       }
     },
     "manual_link": {
@@ -85,5 +61,48 @@
       "type": "string"
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "definitions": {
+    "PlatformWithDownloadLink": {
+      "type": "object",
+      "properties": {
+        "arch": { "type": "string" },
+        "os": { "type": "string" },
+        "name": { "type": "string" },
+        "download_link": { "type": "string" }
+      },
+      "required": [ "arch", "os", "name", "download_link" ],
+      "additionalProperties": false
+    },
+    "PlatformWithPackages": {
+      "type": "object",
+      "properties": {
+        "arch": { "type": "string" },
+        "os": { "type": "string" },
+        "packages": { "$ref": "#/definitions/Package" }
+      },
+      "required": [ "arch", "os", "packages" ],
+      "additionalProperties": false
+    },
+    "Package": {
+      "type": "object",
+      "properties": {
+        "links": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Link" }
+        }
+      },
+      "required": [ "links" ],
+      "additionalProperties": false
+    },
+    "Link": {
+      "type": "object",
+      "properties": {
+        "download_link": { "type": "string" },
+        "name": { "type": "string" }
+      },
+      "required": [ "name", "download_link" ],
+      "additionalProperties": false
+    }
+  }
 }
