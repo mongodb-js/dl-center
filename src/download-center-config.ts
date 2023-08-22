@@ -1,4 +1,3 @@
-/* eslint-disable */
 /* AUTO-GENERATED DO NOT EDIT. */
 
 export type DownloadCenterConfig = DownloadCenterConfigV1 | DownloadCenterConfigV2;
