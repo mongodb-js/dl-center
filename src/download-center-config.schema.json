@@ -84,6 +84,7 @@
           "items": { "$ref": "#/definitions/Package" }
         }
       },
+      "required": [ "arch", "os", "packages" ],
       "additionalProperties": false
     },
     "Package": {

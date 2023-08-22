@@ -137,6 +137,7 @@ describe('download center client', () => {
   describe('validate-config', () => {
     const links = {
       darwin: 'https://downloads.mongodb.com/compass/mongosh-0.2.2-darwin.zip',
+      darwin_dmg: 'https://downloads.mongodb.com/compass/mongosh-0.2.2-darwin.dmg',
       win32: 'https://downloads.mongodb.com/compass/mongosh-0.2.2-win32.zip',
       linux: 'https://downloads.mongodb.com/compass/mongosh-0.2.2-linux.tgz',
       debian: 'https://downloads.mongodb.com/compass/mongosh_0.2.2_amd64.deb',
@@ -184,6 +185,42 @@ describe('download center client', () => {
       tutorial_link: 'test',
     };
 
+    const downloadCenterJsonWithMultiplePackages = {
+      versions: [
+        {
+          _id: '0.2.2',
+          version: '0.2.2',
+          platform: [
+            {
+              arch: 'x64',
+              os: 'darwin',
+              packages: [
+                {
+                  links: [
+                    {
+                      download_link: links.darwin,
+                      name: 'zip'
+                    },
+                    {
+                      download_link: links.darwin_dmg,
+                      name: 'dmg'
+                    }
+                  ]
+                }
+              ]
+            },
+          ],
+        },
+      ],
+      manual_link: 'https://docs.mongodb.org/manual/products/mongosh',
+      release_notes_link:
+        'https://github.com/mongodb-js/mongosh/releases/tag/v0.2.2',
+      previous_releases_link: '',
+      development_releases_link: '',
+      supported_browsers_link: '',
+      tutorial_link: 'test',
+    };
+
     describe('validateConfigSchema', () => {
       it('does not throw with a valid config', () => {
         expect(() => {
@@ -209,60 +246,87 @@ describe('download center client', () => {
         nock(url.origin).head(url.pathname).reply(status, undefined, headers);
       }
 
-      describe('when all links are correct', () => {
-        beforeEach(() => {
-          nock.cleanAll();
-          nockLink(links.darwin, 302, {
-            Location: 'http://example.com/redirect',
+      describe('for single package per platform', () => {
+        describe('when all links are correct', () => {
+          beforeEach(() => {
+            nock.cleanAll();
+            nockLink(links.darwin, 302, {
+              Location: 'http://example.com/redirect',
+            });
+            nockLink(links.win32, 200);
+            nockLink(links.linux, 200);
+            nockLink(links.debian, 200);
+            nockLink('http://example.com/redirect', 200);
           });
-          nockLink(links.win32, 200);
-          nockLink(links.linux, 200);
-          nockLink(links.debian, 200);
-          nockLink('http://example.com/redirect', 200);
+
+          afterEach(() => {
+            if (!nock.isDone()) {
+              throw new Error('HTTP calls to link urls were not done');
+            }
+          });
+
+          it('does not throw if all the downloads are ok', async() => {
+            await expect(
+              validateDownloadLinks(downloadCenterJson)
+            ).resolves.toBeUndefined();
+          });
         });
 
-        afterEach(() => {
-          if (!nock.isDone()) {
-            throw new Error('HTTP calls to link urls were not done');
-          }
-        });
+        describe('with broken links', () => {
+          beforeEach(() => {
+            nock.cleanAll();
+            nockLink(links.darwin, 200);
+            nockLink(links.win32, 302, {
+              Location: 'http://example.com/redirect',
+            });
+            nockLink(links.linux, 200);
+            nockLink(links.debian, 404);
+            nockLink('http://example.com/redirect', 404);
+          });
 
-        it('does not throw if all the downloads are ok', async() => {
-          await expect(
-            validateDownloadLinks(downloadCenterJson)
-          ).resolves.toBeUndefined();
+          afterEach(() => {
+            if (!nock.isDone()) {
+              throw new Error('HTTP calls to link urls were not done');
+            }
+          });
+
+          it('throws reporting broken urls', async() => {
+            const error = await validateDownloadLinks(downloadCenterJson).catch(
+              (e) => e
+            );
+
+            expect(error).not.toBeUndefined();
+            expect(error.message).toEqual(
+              'Download center urls broken:\n' +
+                '- https://downloads.mongodb.com/compass/mongosh-0.2.2-win32.zip -> 404\n' +
+                '- https://downloads.mongodb.com/compass/mongosh_0.2.2_amd64.deb -> 404'
+            );
+          });
         });
       });
 
-      describe('with broken links', () => {
-        beforeEach(() => {
-          nock.cleanAll();
-          nockLink(links.darwin, 200);
-          nockLink(links.win32, 302, {
-            Location: 'http://example.com/redirect',
+      describe('for multiple packages per platform', () => {
+        describe('when all links are correct', () => {
+          beforeEach(() => {
+            nock.cleanAll();
+            nockLink(links.darwin, 302, {
+              Location: 'http://example.com/redirect',
+            });
+            nockLink(links.darwin_dmg, 200);
+            nockLink('http://example.com/redirect', 200);
           });
-          nockLink(links.linux, 200);
-          nockLink(links.debian, 404);
-          nockLink('http://example.com/redirect', 404);
-        });
 
-        afterEach(() => {
-          if (!nock.isDone()) {
-            throw new Error('HTTP calls to link urls were not done');
-          }
-        });
+          afterEach(() => {
+            if (!nock.isDone()) {
+              throw new Error('HTTP calls to link urls were not done');
+            }
+          });
 
-        it('throws reporting broken urls', async() => {
-          const error = await validateDownloadLinks(downloadCenterJson).catch(
-            (e) => e
-          );
-
-          expect(error).not.toBeUndefined();
-          expect(error.message).toEqual(
-            'Download center urls broken:\n' +
-              '- https://downloads.mongodb.com/compass/mongosh-0.2.2-win32.zip -> 404\n' +
-              '- https://downloads.mongodb.com/compass/mongosh_0.2.2_amd64.deb -> 404'
-          );
+          it('does not throw if all the downloads are ok', async() => {
+            await expect(
+              validateDownloadLinks(downloadCenterJsonWithMultiplePackages)
+            ).resolves.toBeUndefined();
+          });
         });
       });
 

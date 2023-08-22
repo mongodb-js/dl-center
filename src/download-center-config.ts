@@ -20,9 +20,9 @@ export interface PlatformWithDownloadLink {
   download_link: string;
 }
 export interface PlatformWithPackages {
-  arch?: string;
-  os?: string;
-  packages?: Package[];
+  arch: string;
+  os: string;
+  packages: Package[];
 }
 export interface Package {
   links: Link[];
