@@ -194,20 +194,18 @@ describe('download center client', () => {
             {
               arch: 'x64',
               os: 'darwin',
-              packages: [
-                {
-                  links: [
-                    {
-                      download_link: links.darwin,
-                      name: 'zip'
-                    },
-                    {
-                      download_link: links.darwin_dmg,
-                      name: 'dmg'
-                    }
-                  ]
-                }
-              ]
+              packages: {
+                links: [
+                  {
+                    download_link: links.darwin,
+                    name: 'zip'
+                  },
+                  {
+                    download_link: links.darwin_dmg,
+                    name: 'dmg'
+                  }
+                ]
+              }
             },
           ],
         },

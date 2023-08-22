@@ -22,7 +22,7 @@ export interface PlatformWithDownloadLink {
 export interface PlatformWithPackages {
   arch: string;
   os: string;
-  packages: Package[];
+  packages: Package;
 }
 export interface Package {
   links: Link[];

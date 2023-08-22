@@ -126,9 +126,7 @@ export async function validateDownloadLinks(
         links.push({ download_link: singlePlatform.download_link, name: '' });
       } else {
         const platformWithPackages = platform as PlatformWithPackages;
-        for (const downloadPackage of platformWithPackages.packages) {
-          links.push(...downloadPackage.links);
-        }
+        links.push(...platformWithPackages.packages.links);
       }
     }
   }

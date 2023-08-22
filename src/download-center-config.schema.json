@@ -79,10 +79,7 @@
       "properties": {
         "arch": { "type": "string" },
         "os": { "type": "string" },
-        "packages": {
-          "type": "array",
-          "items": { "$ref": "#/definitions/Package" }
-        }
+        "packages": { "$ref": "#/definitions/Package" }
       },
       "required": [ "arch", "os", "packages" ],
       "additionalProperties": false
